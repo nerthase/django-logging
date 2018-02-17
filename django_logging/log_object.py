@@ -12,8 +12,9 @@ from . import settings
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseLogObject(object):
-    def __init__(self, request):
+    def __init__(self, request, data):
         self.request = request
+        self.data = data
 
     @property
     def to_dict(self):
@@ -32,12 +33,9 @@ class BaseLogObject(object):
         result['scheme'] = getattr(self.request, 'scheme', None)
 
         try:
-            result['data'] = {key: value for key, value in self.request.data.items()}
+            result['data'] = json.loads(self.data)
         except AttributeError:
-            if self.request.method == 'GET':
-                result['data'] = self.request.GET.dict()
-            elif self.request.method == 'POST':
-                result['data'] = self.request.POST.dict()
+            result['data'] = None
 
         try:
             result['user'] = str(self.request.user)
@@ -48,8 +46,8 @@ class BaseLogObject(object):
 
 
 class LogObject(BaseLogObject):
-    def __init__(self, request, response, duration):
-        super(LogObject, self).__init__(request)
+    def __init__(self, request, data, response, duration):
+        super(LogObject, self).__init__(request, data)
         self.response = response
         self.duration = duration
 
@@ -103,8 +101,8 @@ class LogObject(BaseLogObject):
 
 
 class ErrorLogObject(BaseLogObject):
-    def __init__(self, request, exception, duration):
-        super(ErrorLogObject, self).__init__(request)
+    def __init__(self, request, data, exception, duration):
+        super(ErrorLogObject, self).__init__(request, data)
         self.exception = exception
         self.__traceback = None
         self.duration = duration
