@@ -34,7 +34,7 @@ class BaseLogObject(object):
 
         try:
             result['data'] = json.loads(self.data)
-        except AttributeError:
+        except (AttributeError, UnicodeDecodeError):
             result['data'] = None
 
         try:
