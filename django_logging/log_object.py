@@ -20,6 +20,14 @@ class BaseLogObject(object):
     def to_dict(self):
         raise NotImplementedError
 
+    def matching_content_type(self, headers):
+        return (not settings.CONTENT_TYPES) or (
+            'content_type' in headers and len(
+                [t for t in settings.CONTENT_TYPES
+                 if t in headers['content_type']]
+                ) > 0
+        )
+
     def format_request(self):
         meta_keys = ['PATH_INFO', 'HTTP_X_SCHEME', 'REMOTE_ADDR',
                      'TZ', 'REMOTE_HOST', 'CONTENT_TYPE', 'CONTENT_LENGTH', 'HTTP_AUTHORIZATION',
@@ -32,10 +40,17 @@ class BaseLogObject(object):
 
         result['scheme'] = getattr(self.request, 'scheme', None)
 
-        try:
-            result['data'] = json.loads(self.data)
-        except (AttributeError, UnicodeDecodeError):
-            result['data'] = None
+        if self.matching_content_type(result['meta']):
+            if settings.CONTENT_JSON_ONLY:
+                try:
+                    result['content'] = json.loads(self.data)
+                except (ValueError, AttributeError):
+                    result['data'] = None
+            else:
+                try:
+                    result['content'] = self.data
+                except AttributeError:
+                    result['data'] = None
 
         try:
             result['user'] = str(self.request.user)
@@ -65,6 +80,7 @@ class LogObject(BaseLogObject):
     @property
     def content(self):
         return self.response.content.decode(settings.ENCODING)
+
 
     def matching_content_type(self, headers):
         return (not settings.CONTENT_TYPES) or (
