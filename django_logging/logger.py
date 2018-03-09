@@ -32,7 +32,8 @@ LOGGING = {
     },
     'formatters': {
         'verbose': {
-            'format': '[%(levelname)s - %(created)s] file:%(module)s.py, func:%(funcName)s, ln:%(lineno)s: %(message)s'
+            'format': '[%(levelname)s - %(created)s] file:%(module)s.py, func:%(funcName)s, ln:%(lineno)s: %(message)s',
+            'datefmt': "%Y-%m-%dT%H:%M:%S"
         },
         'simple': {
             'format': '%(message)s'
