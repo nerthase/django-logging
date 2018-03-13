@@ -20,7 +20,7 @@ class BaseLogObject(object):
     def to_dict(self):
         raise NotImplementedError
 
-    def matching_content_type(self, headers):
+    def matching_content_type_base(self, headers):
         return (not settings.CONTENT_TYPES) or (
             'content_type' in headers and len(
                 [t for t in settings.CONTENT_TYPES
@@ -40,7 +40,7 @@ class BaseLogObject(object):
 
         result['scheme'] = getattr(self.request, 'scheme', None)
 
-        if self.matching_content_type(result['meta']):
+        if self.matching_content_type_base(result['meta']):
             if settings.CONTENT_JSON_ONLY:
                 try:
                     result['content'] = json.loads(self.data)
@@ -80,7 +80,6 @@ class LogObject(BaseLogObject):
     @property
     def content(self):
         return self.response.content.decode(settings.ENCODING)
-
 
     def matching_content_type(self, headers):
         return (not settings.CONTENT_TYPES) or (
