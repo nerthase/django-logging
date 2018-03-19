@@ -44,7 +44,7 @@ class BaseLogObject(object):
             if settings.CONTENT_JSON_ONLY:
                 try:
                     result['content'] = json.loads(self.data)
-                except (ValueError, AttributeError):
+                except (ValueError, AttributeError, TypeError):
                     result['data'] = None
             else:
                 try:
@@ -101,7 +101,7 @@ class LogObject(BaseLogObject):
             if settings.CONTENT_JSON_ONLY:
                 try:
                     result['content'] = json.loads(self.content)
-                except (ValueError, AttributeError):
+                except (ValueError, AttributeError, TypeError):
                     pass
             else:
                 try:
